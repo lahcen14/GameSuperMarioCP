@@ -1,0 +1,8 @@
+{
+  "name": "مغامرة عالم الحاسوب — Computer World Adventure",
+  "description": "لعبة مغامرات ومنصات تعليمية ثنائية الأبعاد (2D Platformer) باللغة العربية تجمع بين متعة اللعب واستكشاف عالم ومكونات الحاسوب مع 5 مراحل و100+ سؤال وموسيقى ريترو 8-بت.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
