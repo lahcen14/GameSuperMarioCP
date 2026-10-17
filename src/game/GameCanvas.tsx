@@ -63,6 +63,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const stageDataRef = useRef<StageData>(getStageData(stageId));
   const tickRef = useRef<number>(0);
   const cameraXRef = useRef<number>(0);
+  const cameraYRef = useRef<number>(0);
   const particlesRef = useRef<Particle[]>([]);
 
   // Player state ref
@@ -98,6 +99,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // Active terminal nearby for prompt
   const nearbyTerminalRef = useRef<TerminalEntity | null>(null);
+  const isNearTerminalRef = useRef<boolean>(false);
+  const [isNearTerminal, setIsNearTerminal] = useState<boolean>(false);
   // Auto-opened terminal memory so player doesn't get infinite re-open loops while standing still
   const lastAutoOpenedTerminalIdRef = useRef<number | null>(null);
 
@@ -127,6 +130,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     playerRef.current.hearts = 3;
     playerRef.current.checkpoint = { ...stageDataRef.current.spawnPoint };
     cameraXRef.current = 0;
+    cameraYRef.current = 0;
     particlesRef.current = [];
 
     setHudState({
@@ -494,26 +498,32 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // ==========================================
       // 2. Terminal Detection & Auto-Opening
       // ==========================================
-      let foundTerminal: TerminalEntity | null = null;
-      stage.terminals.forEach((term) => {
+      const foundTerminal = stage.terminals.find((term) => {
         const dist = Math.hypot(
           p.x + p.width / 2 - (term.x + term.width / 2),
           p.y + p.height / 2 - (term.y + term.height / 2)
         );
-        if (dist < 45) {
-          foundTerminal = term;
-          // Auto-open question box automatically upon reaching it!
-          if (!term.solved && lastAutoOpenedTerminalIdRef.current !== term.id) {
-            lastAutoOpenedTerminalIdRef.current = term.id;
-            p.vx = 0;
-            keysRef.current.left = false;
-            keysRef.current.right = false;
-            retroAudio.playTerminalOpen();
-            onOpenQuestionModal(term);
-          }
+        return dist < 45;
+      }) || null;
+
+      if (foundTerminal) {
+        // Auto-open question box automatically upon reaching it!
+        if (!foundTerminal.solved && lastAutoOpenedTerminalIdRef.current !== foundTerminal.id) {
+          lastAutoOpenedTerminalIdRef.current = foundTerminal.id;
+          p.vx = 0;
+          keysRef.current.left = false;
+          keysRef.current.right = false;
+          retroAudio.playTerminalOpen();
+          onOpenQuestionModal(foundTerminal);
         }
-      });
+      }
       nearbyTerminalRef.current = foundTerminal;
+
+      const hasNearbyUnsolvedTerminal = Boolean(foundTerminal && !foundTerminal.solved);
+      if (hasNearbyUnsolvedTerminal !== isNearTerminalRef.current) {
+        isNearTerminalRef.current = hasNearbyUnsolvedTerminal;
+        setIsNearTerminal(hasNearbyUnsolvedTerminal);
+      }
 
       // Reset auto-open memory if player moved away
       if (!foundTerminal) {
@@ -707,12 +717,43 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
 
       // ==========================================
-      // 6. Camera Tracking (Smooth Lerp)
+      // 6. Camera Tracking (Smooth Lerp & Elevation)
       // ==========================================
-      const targetCamX = p.x - viewportW * 0.35;
-      const maxCamX = Math.max(0, stage.width - viewportW);
+      // Responsive scale: fits world gracefully on mobile devices and landscape phones
+      const isLandscape = viewportW > viewportH;
+      let scale = 1;
+      if (isLandscape) {
+        scale = Math.min(1.0, Math.max(0.72, viewportH / 460));
+      } else {
+        // Portrait or square
+        scale = Math.min(1.15, Math.max(0.75, viewportW / 460));
+      }
+
+      const visibleWorldW = viewportW / scale;
+
+      // Smooth horizontal camera follow
+      const targetCamX = p.x - visibleWorldW * 0.35;
+      const maxCamX = Math.max(0, stage.width - visibleWorldW);
       cameraXRef.current += (Math.max(0, Math.min(maxCamX, targetCamX)) - cameraXRef.current) * 0.1;
       const camX = cameraXRef.current;
+
+      // Vertical Camera: Elevate the ground clearly above the bottom touch controls
+      // On portrait phones, ground is raised ~180-240px from bottom so the ground, character, and obstacles are prominently elevated
+      // On landscape phones, ground is raised ~80-100px
+      const groundScreenPadding = isLandscape
+        ? Math.min(100, Math.max(75, viewportH * 0.22))
+        : Math.min(240, Math.max(160, viewportH * 0.28));
+
+      const groundWorldY = 520;
+      // Base camera Y that elevates the ground to (viewportH - groundScreenPadding)
+      const baseCamY = groundWorldY - (viewportH - groundScreenPadding) / scale;
+
+      // Smoothly follow player if they jump or climb high platforms (y < 350)
+      const playerCenterCamY = (p.y + p.height / 2) - (viewportH * 0.52) / scale;
+      const targetCamY = Math.min(baseCamY, Math.max(-100, playerCenterCamY));
+
+      cameraYRef.current += (targetCamY - cameraYRef.current) * 0.1;
+      const camY = cameraYRef.current;
 
       // ==========================================
       // 7. Render All Elements
@@ -723,11 +764,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       PixelRenderer.drawBackground(ctx, theme, camX, viewportW, viewportH, tick);
 
       ctx.save();
-      ctx.translate(-Math.round(camX), 0);
+      ctx.scale(scale, scale);
+      ctx.translate(-Math.round(camX), -Math.round(camY));
 
       // Platforms
       stage.platforms.forEach((plat) => {
-        if (plat.x + plat.width > camX - 50 && plat.x < camX + viewportW + 50) {
+        if (plat.x + plat.width > camX - 100 && plat.x < camX + visibleWorldW + 100) {
           PixelRenderer.drawPlatform(ctx, plat, theme);
         }
       });
@@ -835,6 +877,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         onPressRight={handleTouchRight}
         onPressJump={handleTouchJump}
         onPressInteract={handleTouchInteract}
+        isNearTerminal={isNearTerminal}
       />
     </div>
   );

@@ -557,6 +557,8 @@ export class PixelRenderer {
 
     const w = p.width;
     const h = p.height;
+    const isGround = p.y >= 500;
+    const renderH = isGround ? Math.max(h, 500) : h;
 
     let topColor = '#15803d';
     let bodyColor = '#166534';
@@ -587,7 +589,7 @@ export class PixelRenderer {
 
     // Main platform body
     ctx.fillStyle = bodyColor;
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillRect(0, 0, w, renderH);
 
     // Top grass / circuit layer
     ctx.fillStyle = topColor;
@@ -596,7 +598,7 @@ export class PixelRenderer {
     // Outer border
     ctx.strokeStyle = borderColor;
     ctx.lineWidth = 1.5;
-    ctx.strokeRect(0, 0, w, h);
+    ctx.strokeRect(0, 0, w, renderH);
 
     // Procedural circuit texture marks inside platform
     ctx.fillStyle = 'rgba(255,255,255,0.08)';
@@ -604,6 +606,19 @@ export class PixelRenderer {
       ctx.fillRect(x, 8, 12, 2);
       ctx.fillRect(x + 5, 8, 2, Math.max(4, h - 14));
       ctx.fillRect(x + 5, h - 6, 8, 2);
+    }
+
+    // Subterranean high-tech bedrock layers for ground floor
+    if (isGround) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+      ctx.fillRect(0, h + 15, w, renderH - (h + 15));
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+      for (let gy = h + 25; gy < renderH; gy += 40) {
+        ctx.fillRect(0, gy, w, 2);
+        for (let bx = 16; bx < w - 16; bx += 60) {
+          ctx.fillRect(bx, gy - 6, 16, 6);
+        }
+      }
     }
 
     ctx.restore();

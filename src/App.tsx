@@ -283,7 +283,7 @@ export default function App() {
       totalCoins: 0,
       answeredQuestionIds: [],
       unlockedBadges: [],
-      playerName: 'بوشريط لحسن',
+      playerName: 'البطل المستكشف',
       hasCompletedFinalBoss: false,
     };
     setProgress(initialProgress);

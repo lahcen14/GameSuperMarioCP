@@ -49,7 +49,7 @@ export const EncyclopediaModal: React.FC<EncyclopediaModalProps> = ({ onClose })
                 موسوعة وبنك أسئلة عالم الحاسوب
               </h2>
               <span className="text-xs text-slate-400">
-                قاعدة معرفية شاملة تضم {QUESTIONS_DATABASE.length} سؤالاً وشرحاً علمياً
+                قاعدة معرفية شاملة تضم {QUESTIONS_DATABASE.length} سؤالاً تفاعلياً
               </span>
             </div>
           </div>
@@ -156,12 +156,6 @@ export const EncyclopediaModal: React.FC<EncyclopediaModalProps> = ({ onClose })
                       </div>
                     );
                   })}
-                </div>
-
-                {/* Scientific explanation */}
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800/80 text-xs text-slate-300 leading-relaxed">
-                  <span className="font-bold text-cyan-400">الشرح التعليمي: </span>
-                  {q.explanation}
                 </div>
               </div>
             ))
