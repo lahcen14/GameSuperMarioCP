@@ -717,19 +717,22 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
 
       // ==========================================
-      // 6. Camera Tracking (Smooth Lerp & Elevation)
+      // 6. Camera Tracking & Responsive Fitting
       // ==========================================
-      // Responsive scale: fits world gracefully on mobile devices and landscape phones
       const isLandscape = viewportW > viewportH;
-      let scale = 1;
+      let scale: number;
       if (isLandscape) {
-        scale = Math.min(1.0, Math.max(0.72, viewportH / 460));
+        // In landscape, scale so world height (600) cleanly fits the screen
+        scale = viewportH / 600;
       } else {
-        // Portrait or square
-        scale = Math.min(1.15, Math.max(0.75, viewportW / 460));
+        // In portrait, scale so world width is comfortable (>= 400 world units)
+        // with the ground elevated above bottom touch controls
+        scale = Math.min(viewportH / 600, Math.max(0.75, viewportW / 420));
       }
+      scale = Math.max(0.55, Math.min(1.35, scale));
 
       const visibleWorldW = viewportW / scale;
+      const visibleWorldH = viewportH / scale;
 
       // Smooth horizontal camera follow
       const targetCamX = p.x - visibleWorldW * 0.35;
@@ -737,23 +740,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       cameraXRef.current += (Math.max(0, Math.min(maxCamX, targetCamX)) - cameraXRef.current) * 0.1;
       const camX = cameraXRef.current;
 
-      // Vertical Camera: Elevate the ground clearly above the bottom touch controls
-      // On portrait phones, ground is raised ~180-240px from bottom so the ground, character, and obstacles are prominently elevated
-      // On landscape phones, ground is raised ~80-100px
-      const groundScreenPadding = isLandscape
-        ? Math.min(100, Math.max(75, viewportH * 0.22))
-        : Math.min(240, Math.max(160, viewportH * 0.28));
-
-      const groundWorldY = 520;
-      // Base camera Y that elevates the ground to (viewportH - groundScreenPadding)
-      const baseCamY = groundWorldY - (viewportH - groundScreenPadding) / scale;
-
-      // Smoothly follow player if they jump or climb high platforms (y < 350)
-      const playerCenterCamY = (p.y + p.height / 2) - (viewportH * 0.52) / scale;
-      const targetCamY = Math.min(baseCamY, Math.max(-100, playerCenterCamY));
-
+      // Vertical Camera: keep world clamped between 0 and maxCamY (never negative, no top void)
+      const maxCamY = Math.max(0, stage.height - visibleWorldH);
+      const targetCamY = Math.min(maxCamY, Math.max(0, (p.y + p.height / 2) - visibleWorldH * 0.5));
       cameraYRef.current += (targetCamY - cameraYRef.current) * 0.1;
-      const camY = cameraYRef.current;
+      const camY = Math.max(0, cameraYRef.current);
 
       // ==========================================
       // 7. Render All Elements

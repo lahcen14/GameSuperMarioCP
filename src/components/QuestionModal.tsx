@@ -227,11 +227,6 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
                 )}
               </div>
 
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-3">
-                <span className="font-semibold text-slate-200">الشرح التعليمي: </span>
-                {question.explanation}
-              </p>
-
               {/* Automatic Return Progress Bar when correct */}
               {isCorrect && (
                 <div className="space-y-1 pt-1 border-t border-emerald-800/50">
