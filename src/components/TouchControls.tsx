@@ -15,7 +15,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
   onPressInteract,
 }) => {
   return (
-    <div className="absolute inset-x-0 bottom-16 z-30 px-4 pointer-events-none select-none flex justify-between items-end">
+    <div className="absolute inset-x-0 bottom-2 z-30 px-4 pointer-events-none select-none flex justify-between items-end">
       {/* Directional D-Pad (Left / Right) */}
       <div className="flex items-center gap-3 pointer-events-auto">
         <button
