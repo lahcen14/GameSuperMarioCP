@@ -18,7 +18,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
 }) => {
   return (
     <div
-      className="absolute inset-x-0 bottom-20 sm:bottom-12 md:bottom-10 z-30 px-3 sm:px-6 pointer-events-none select-none flex justify-between items-end pb-[env(safe-area-inset-bottom,14px)]"
+      className="absolute inset-x-0 bottom-25 sm:bottom-12 md:bottom-10 z-30 px-3 sm:px-6 pointer-events-none select-none flex justify-between items-end pb-[env(safe-area-inset-bottom,14px)]"
       dir="ltr"
     >
       {/* Left Hand: Movement D-Pad (Left / Right) */}
