@@ -21,7 +21,57 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
       className="absolute inset-x-0 bottom-25 sm:bottom-12 md:bottom-10 z-30 px-3 sm:px-6 pointer-events-none select-none flex justify-between items-end pb-[env(safe-area-inset-bottom,14px)]"
       dir="ltr"
     >
-      {/* Left Hand: Movement D-Pad (Left / Right) */}
+      {/* Left Hand: Action Buttons (Jump & Interact) */}
+      <div className="flex items-center gap-2 sm:gap-3.5 pointer-events-auto">
+        {/* Jump Button (Far Left) */}
+        <button
+          type="button"
+          onMouseDown={() => onPressJump(true)}
+          onMouseUp={() => onPressJump(false)}
+          onMouseLeave={() => onPressJump(false)}
+          onTouchStart={(e) => {
+            e.preventDefault();
+            onPressJump(true);
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            onPressJump(false);
+          }}
+          onTouchCancel={(e) => {
+            e.preventDefault();
+            onPressJump(false);
+          }}
+          className="w-18 h-18 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-b from-emerald-500 via-emerald-600 to-emerald-800 border-3 border-emerald-300 active:from-emerald-400 active:to-emerald-600 active:scale-90 backdrop-blur-md flex flex-col items-center justify-center text-white shadow-[0_4px_25px_rgba(16,185,129,0.5)] transition-all touch-manipulation group"
+          aria-label="قفز"
+        >
+          <ArrowUp className="w-8 h-8 stroke-[3] group-active:scale-110 drop-shadow" />
+          <span className="text-xs font-black tracking-widest text-emerald-100">قفز</span>
+        </button>
+
+        {/* Interact / Question Terminal button */}
+        <button
+          type="button"
+          onClick={onPressInteract}
+          className={`relative w-15 h-15 sm:w-16 sm:h-16 rounded-2xl backdrop-blur-md flex flex-col items-center justify-center shadow-xl active:scale-90 transition-all touch-manipulation ${
+            isNearTerminal
+              ? 'bg-gradient-to-b from-amber-500 to-amber-700 border-2 border-amber-300 text-white shadow-[0_0_25px_rgba(245,158,11,0.6)] animate-pulse'
+              : 'bg-gradient-to-b from-slate-900/90 to-amber-950/90 border-2 border-amber-600/80 text-amber-200 shadow-[0_4px_15px_rgba(217,119,6,0.25)]'
+          }`}
+          aria-label="تفاعل مع المحطة"
+          title="تفاعل [E]"
+        >
+          {isNearTerminal && (
+            <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500 border border-white"></span>
+            </span>
+          )}
+          <MessageSquareCode className="w-6 h-6 drop-shadow" />
+          <span className="text-[10px] font-black tracking-wider">تفاعل</span>
+        </button>
+      </div>
+
+      {/* Right Hand: Movement D-Pad (Left / Right) */}
       <div className="flex items-center gap-2 sm:gap-3.5 pointer-events-auto">
         {/* Left Arrow Button */}
         <button
@@ -71,56 +121,6 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
         >
           <ChevronRight className="w-8 h-8 group-active:scale-110 drop-shadow" />
           <span className="text-[10px] font-black text-slate-200 tracking-wider">يمين</span>
-        </button>
-      </div>
-
-      {/* Right Hand: Action Buttons (Interact & Jump) */}
-      <div className="flex items-center gap-2 sm:gap-3.5 pointer-events-auto">
-        {/* Interact / Question Terminal button */}
-        <button
-          type="button"
-          onClick={onPressInteract}
-          className={`relative w-15 h-15 sm:w-16 sm:h-16 rounded-2xl backdrop-blur-md flex flex-col items-center justify-center shadow-xl active:scale-90 transition-all touch-manipulation ${
-            isNearTerminal
-              ? 'bg-gradient-to-b from-amber-500 to-amber-700 border-2 border-amber-300 text-white shadow-[0_0_25px_rgba(245,158,11,0.6)] animate-pulse'
-              : 'bg-gradient-to-b from-slate-900/90 to-amber-950/90 border-2 border-amber-600/80 text-amber-200 shadow-[0_4px_15px_rgba(217,119,6,0.25)]'
-          }`}
-          aria-label="تفاعل مع المحطة"
-          title="تفاعل [E]"
-        >
-          {isNearTerminal && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500 border border-white"></span>
-            </span>
-          )}
-          <MessageSquareCode className="w-6 h-6 drop-shadow" />
-          <span className="text-[10px] font-black tracking-wider">تفاعل</span>
-        </button>
-
-        {/* Jump Button */}
-        <button
-          type="button"
-          onMouseDown={() => onPressJump(true)}
-          onMouseUp={() => onPressJump(false)}
-          onMouseLeave={() => onPressJump(false)}
-          onTouchStart={(e) => {
-            e.preventDefault();
-            onPressJump(true);
-          }}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            onPressJump(false);
-          }}
-          onTouchCancel={(e) => {
-            e.preventDefault();
-            onPressJump(false);
-          }}
-          className="w-18 h-18 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-b from-emerald-500 via-emerald-600 to-emerald-800 border-3 border-emerald-300 active:from-emerald-400 active:to-emerald-600 active:scale-90 backdrop-blur-md flex flex-col items-center justify-end text-white shadow-[0_4px_25px_rgba(16,185,129,0.5)] transition-all touch-manipulation group"
-          aria-label="قفز"
-        >
-          <ArrowUp className="w-8 h-8 stroke-[3] group-active:scale-110 drop-shadow" />
-          <span className="text-xs font-black tracking-widest text-emerald-100">قفز</span>
         </button>
       </div>
     </div>
