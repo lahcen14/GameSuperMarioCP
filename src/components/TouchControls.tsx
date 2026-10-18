@@ -116,7 +116,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
             e.preventDefault();
             onPressJump(false);
           }}
-          className="w-18 h-18 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-b from-emerald-500 via-emerald-600 to-emerald-800 border-3 border-emerald-300 active:from-emerald-400 active:to-emerald-600 active:scale-90 backdrop-blur-md flex flex-col items-center justify-center text-white shadow-[0_4px_25px_rgba(16,185,129,0.5)] transition-all touch-manipulation group"
+          className="w-18 h-18 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-b from-emerald-500 via-emerald-600 to-emerald-800 border-3 border-emerald-300 active:from-emerald-400 active:to-emerald-600 active:scale-90 backdrop-blur-md flex flex-col items-center justify-end text-white shadow-[0_4px_25px_rgba(16,185,129,0.5)] transition-all touch-manipulation group"
           aria-label="قفز"
         >
           <ArrowUp className="w-8 h-8 stroke-[3] group-active:scale-110 drop-shadow" />
